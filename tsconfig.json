@@ -4,10 +4,13 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/nest-api-e2e"
+      "path": "./apps/nest-api"
     },
     {
-      "path": "./apps/nest-api"
+      "path": "./apps/react-authentication"
+    },
+    {
+      "path": "./apps/angular-app"
     }
   ]
 }
