@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 function App() {
   const authLogin = {
-    username: 'alice_hr', // Updated to match your NestJS seed data
+    username: 'alice_hr',
     password: 'password123',
   };
 
@@ -14,8 +14,6 @@ function App() {
   const [redirectUrl, setRedirectUrl] = useState('');
   const [traceId, setTraceId] = useState('');
   const [debugInfo, setDebugInfo] = useState(null);
-
-  // New state for loading
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -69,9 +67,9 @@ function App() {
       }
 
       const data = await response.json();
-      const token = data.access_token; // Get the token from BE
+      const token = data.access_token;
 
-      // handle redirect - (Vulnerable Logic)
+      // handle redirect - (vulnerable logic)
       if (redirectUrl) {
         console.log('Redirecting to:', redirectUrl);
 
