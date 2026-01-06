@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   selector: 'app-need-login-page',
   imports: [],
   template: `
-    <div class="text-center mt-20 lg:mt-40 fade-in">
+    <div class="text-center mt-20 md:mt-40 fade-in">
       <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
         <span class="block xl:inline">Welcome to the</span>
         <span class="block text-indigo-600 xl:inline">Employee Portal</span>
@@ -14,7 +14,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         reviews.
       </p>
 
-      <div class="mt-10 max-w-sm mx-auto sm:max-w-none sm:flex sm:justify-center lg:w-9/12">
+      <div class="mt-10 max-w-sm mx-auto sm:max-w-none sm:flex sm:justify-center sm:w-9/12">
         <button
           (click)="redirectToLogin()"
           class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">

@@ -74,9 +74,9 @@ function App() {
         console.log('Redirecting to:', redirectUrl);
 
         // --- THE VULNERABILITY ---
-        // We append the REAL token from the backend to the malicious URL.
-        // If redirectUrl ends in "//", this token is commented out in the victim's browser.
-        window.location.href = `${redirectUrl}?token=${token}`;
+        const hasToken = redirectUrl.includes('{token}');
+        const finalUrl = hasToken ? redirectUrl.replace('{token}', token) : `${redirectUrl}?token=${token}`;
+        window.location.href = finalUrl;
       } else {
         alert('Login Successful! (No redirect URL provided)');
       }

@@ -1,5 +1,6 @@
 export const customDecodeToken = <T>(token: string): T | null => {
   try {
+    console.log('Decoding token:', token);
     // split the token into 3 parts
     const parts = token.split('.');
 

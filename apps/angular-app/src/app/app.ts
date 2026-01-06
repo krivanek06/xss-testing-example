@@ -63,15 +63,4 @@ export class App {
       }
     });
   }
-
-  /**
-   * Helper to determine initial state purely from environment
-   */
-  // private getInitialToken(): string | null {
-  //   const params = new URLSearchParams(window.location.search);
-  //   const urlToken = params.get('token');
-
-  //   if (urlToken) return urlToken;
-  //   return localStorage.getItem('access_token');
-  // }
 }
