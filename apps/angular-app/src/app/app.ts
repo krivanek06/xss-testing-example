@@ -10,7 +10,9 @@ import { customDecodeToken } from './services/utils.model';
   selector: 'app-root',
   template: `
     <app-header />
-    <router-outlet />
+    <main class="max-w-[1060px] mx-auto">
+      <router-outlet />
+    </main>
   `,
   styles: [``],
 })
