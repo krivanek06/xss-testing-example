@@ -1,9 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ActivatedRoute, Router } from '@angular/router';
+import { filter } from 'rxjs';
+import { CandidateFormDialogComponent } from '../components/candidate-form-dialog';
 import { AppState } from '../services/app-state';
+import { CandidateStatus } from '../services/data.model';
 
 @Component({
   selector: 'app-overview-page',
-  imports: [],
+  imports: [MatDialogModule, MatSnackBarModule],
   template: `
     <div class="mt-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -12,18 +18,30 @@ import { AppState } from '../services/app-state';
 
           <div class="relative">
             <select
-              (change)="onFilterChange($event)"
+              [value]="currentSort().status"
+              (change)="updateQueryParams('status', $any($event.target).value)"
               class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md border">
-              <option value="">All Statuses</option>
+              <option value="All">All Statuses</option>
               <option value="New">New</option>
               <option value="Interviewing">Interviewing</option>
               <option value="Rejected">Rejected</option>
               <option value="Hired">Hired</option>
             </select>
           </div>
+
+          <div class="relative">
+            <select
+              [value]="currentSort().sort"
+              (change)="updateQueryParams('sort', $any($event.target).value)"
+              class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md border">
+              <option value="latest">Latest</option>
+              <option value="oldest">Oldest</option>
+            </select>
+          </div>
         </div>
 
         <button
+          (click)="onAddCandidate()"
           class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
           Add Candidate
         </button>
@@ -32,7 +50,7 @@ import { AppState } from '../services/app-state';
       <div class="mt-6">
         <ul role="list" class="grid gap-6">
           @for (candidate of candidates(); track candidate.id) {
-            <li class="hover:bg-gray-300 transition-colors duration-150 ease-in-out bg-gray-200 rounded-md shadow-md">
+            <li class="hover:bg-gray-100 transition-colors duration-150 ease-in-out bg-gray-50 rounded-md shadow-md">
               <div class="px-4 py-4 sm:px-6">
                 <div class="flex items-center justify-between">
                   <div class="truncate text-sm font-medium text-indigo-600">
@@ -102,15 +120,28 @@ import { AppState } from '../services/app-state';
 })
 export class OverviewPage {
   private readonly appState = inject(AppState);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly currentUser = this.appState.currentUser;
   readonly candidates = computed(() => this.appState.publicState().candidates);
+
+  readonly currentSort = signal<{
+    sort: 'latest' | 'oldest';
+    status: CandidateStatus;
+  }>({
+    sort: (this.route.snapshot.queryParamMap.get('sort') as 'latest' | 'oldest') || 'latest',
+    status: (this.route.snapshot.queryParamMap.get('status') as CandidateStatus) || 'All',
+  });
 
   constructor() {
     this.appState.getAllCandidates();
 
     effect(() => {
       console.log('Candidates updated:', this.appState.publicState().candidates);
+      console.log('currentSort', this.currentSort());
     });
   }
 
@@ -122,5 +153,34 @@ export class OverviewPage {
 
     // Optional: If you want server-side filtering instead:
     // this.candidatesService.getAllCandidates({ status: status as CandidateStatus }).subscribe(...)
+  }
+
+  onAddCandidate() {
+    const dialogRef = this.dialog.open(CandidateFormDialogComponent, {
+      width: '700px',
+    });
+
+    dialogRef
+      .afterClosed()
+      .pipe(filter(Boolean))
+      .subscribe(result => {
+        this.appState.createCandidate(result).subscribe(result => {
+          if (result) {
+            this.snackBar.open('Candidate added successfully!', undefined, {
+              duration: 1500,
+              horizontalPosition: 'end',
+              verticalPosition: 'top',
+            });
+          }
+        });
+      });
+  }
+
+  updateQueryParams(key: 'status' | 'sort', value: string) {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { [key]: value || null },
+      queryParamsHandling: 'merge',
+    });
   }
 }

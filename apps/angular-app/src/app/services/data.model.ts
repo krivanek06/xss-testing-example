@@ -15,3 +15,7 @@ export type Candidate = {
   coverLetter: string;
   resumeUrl: string;
 };
+
+export type CandidateStatus = Candidate['status'];
+
+export type CandidateDTO = Omit<Candidate, 'id'>;

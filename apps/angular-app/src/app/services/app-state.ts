@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
+import { catchError, map, of, tap } from 'rxjs';
 import { Candidate, User } from './data.model';
 
 type AppStateModel = {
@@ -25,19 +26,25 @@ export class AppState {
 
   private readonly candidateUrl = 'http://localhost:3000/api/candidates';
 
-  getAllCandidates(params?: { status?: Candidate['status']; offset?: number; limit?: number }): void {
+  getAllCandidates(params?: {
+    status?: Candidate['status'];
+    offset?: number;
+    limit?: number;
+    order?: 'latest' | 'oldest';
+  }): void {
     let httpParams = new HttpParams();
 
-    if (params) {
-      if (params.status) {
-        httpParams = httpParams.set('status', params.status);
-      }
-      if (params.offset !== undefined) {
-        httpParams = httpParams.set('offset', params.offset.toString());
-      }
-      if (params.limit !== undefined) {
-        httpParams = httpParams.set('limit', params.limit.toString());
-      }
+    if (params?.status) {
+      httpParams = httpParams.set('status', params.status);
+    }
+    if (params?.offset) {
+      httpParams = httpParams.set('offset', params.offset.toString());
+    }
+    if (params?.limit) {
+      httpParams = httpParams.set('limit', params.limit.toString());
+    }
+    if (params?.order) {
+      httpParams = httpParams.set('order', params.order);
     }
 
     // load candidates
@@ -46,10 +53,12 @@ export class AppState {
     });
   }
 
-  createCandidate(candidate: Candidate): void {
-    this.http.post<Candidate>(this.candidateUrl, candidate).subscribe(candidate => {
-      this.state.update(s => ({ ...s, candidates: [...s.candidates, candidate] }));
-    });
+  createCandidate(candidate: Candidate) {
+    return this.http.post<Candidate>(this.candidateUrl, candidate).pipe(
+      tap(candidate => this.state.update(s => ({ ...s, candidates: [...s.candidates, candidate] }))),
+      map(() => true),
+      catchError(() => of(false))
+    );
   }
 
   updateCandidate(id: string, candidate: Partial<Candidate>): void {

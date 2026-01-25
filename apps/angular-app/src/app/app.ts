@@ -1,5 +1,5 @@
 import { afterNextRender, Component, inject } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './components/header';
 import { AppState } from './services/app-state';
 import { User } from './services/data.model';
@@ -18,13 +18,24 @@ import { customDecodeToken } from './services/utils.model';
 })
 export class App {
   private readonly appState = inject(AppState);
-  private readonly router = inject(Router);
 
   constructor() {
-    // check URL for token on initial load - user authenticated
+    const storedToken = localStorage.getItem('access_token');
+
+    if (storedToken) {
+      const decodedToken = customDecodeToken<User>(storedToken);
+
+      // decoded token is valid, restore session
+      if (decodedToken) {
+        this.appState.setData('token', storedToken);
+        this.appState.setData('user', decodedToken);
+      }
+    }
+
     afterNextRender(() => {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get('token') as string | null;
+      // use the URL object to manipulate params without wiping others
+      const url = new URL(window.location.href);
+      const token = url.searchParams.get('token');
 
       if (!token) {
         return;
@@ -33,35 +44,16 @@ export class App {
       const decodedToken = customDecodeToken<User>(token);
 
       if (decodedToken) {
-        // clean URL to remove token param
-        window.history.replaceState({}, document.title, '/');
+        console.log('Authenticated via URL');
 
-        console.log({
-          token: token,
-          decodedToken: decodedToken,
-        });
+        // remove token from URL to prevent leaks
+        url.searchParams.delete('token');
+        window.history.replaceState({}, document.title, url.toString());
 
+        // store in app state and local storage
         this.appState.setData('token', token);
         this.appState.setData('user', decodedToken);
-
         localStorage.setItem('access_token', token);
-      }
-    });
-
-    // check if token exists in localStorage on app start
-    afterNextRender(() => {
-      const storedToken = localStorage.getItem('access_token');
-      if (!storedToken) {
-        return;
-      }
-
-      console.log('Found stored token in localStorage:', storedToken);
-      this.appState.setData('token', storedToken);
-
-      const decodedToken = customDecodeToken<User>(storedToken);
-      if (decodedToken) {
-        this.appState.setData('user', decodedToken);
-        this.router.navigate(['/overview']);
       }
     });
   }
