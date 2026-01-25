@@ -3,7 +3,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthController } from './auth/auth.controller';
-import { FakeDatabaseService } from './database/fake-database.service';
+import { CandidatesModule } from './candidates/candidates.module';
+import { FakeDatabaseModule } from './database/fake-database.module';
 
 @Module({
   imports: [
@@ -12,8 +13,10 @@ import { FakeDatabaseService } from './database/fake-database.service';
       secret: 'SUPER_SECRET_KEY_123',
       signOptions: { expiresIn: '2d' },
     }),
+    CandidatesModule,
+    FakeDatabaseModule,
   ],
   controllers: [AppController, AuthController],
-  providers: [AppService, FakeDatabaseService],
+  providers: [AppService],
 })
 export class AppModule {}

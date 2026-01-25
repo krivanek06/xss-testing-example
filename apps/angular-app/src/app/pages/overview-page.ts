@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
 import { AppState } from '../services/app-state';
 
 @Component({
@@ -47,4 +47,12 @@ export class OverviewPage {
   private readonly appState = inject(AppState);
 
   readonly currentUser = this.appState.currentUser;
+
+  constructor() {
+    this.appState.getAllCandidates();
+
+    effect(() => {
+      console.log('Candidates updated:', this.appState.publicState().candidates);
+    });
+  }
 }

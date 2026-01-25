@@ -1,45 +1,55 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Candidate, candidates, employees, User } from './seed-data.model';
 
+type DBStructure = {
+  users: User[];
+  candidates: Candidate[];
+};
+
+type DBKeys = keyof DBStructure;
+
 @Injectable()
 export class FakeDatabaseService implements OnModuleInit {
-  private readonly db = new Map<string, any>();
+  private readonly db: DBStructure = {
+    users: [],
+    candidates: [],
+  };
 
   onModuleInit() {
     this.seed();
   }
 
-  get<T>(key: string): T | undefined {
-    return this.db.get(key);
+  add<T extends DBKeys>(key: T, value: DBStructure[T][number]): void {
+    this.db[key].push(value as any);
   }
 
-  set(key: string, value: any): void {
-    this.db.set(key, value);
+  update<T extends DBKeys>(key: T, id: string, value: Partial<DBStructure[T][number]>): void {
+    const index = this.db[key].findIndex(item => item.id === id);
+    if (index !== -1) {
+      this.db[key][index] = { ...this.db[key][index], ...value };
+    }
   }
 
-  getAll(): Record<string, any> {
-    return Object.fromEntries(this.db);
+  deleteItem<T extends DBKeys>(key: T, id: string): void {
+    this.db[key] = this.db[key].filter(item => item.id !== id) as DBStructure[T];
   }
 
-  clear(): void {
-    this.db.clear();
+  getAllType<T extends DBKeys>(type: T): DBStructure[T] {
+    return this.db[type];
   }
 
-  /**
-   * Helpers to get specific collections
-   */
   getUsers(): User[] {
-    return this.get<User[]>('users') || [];
+    return this.db.users;
   }
 
   getCandidates(): Candidate[] {
-    return this.get<Candidate[]>('candidates') || [];
+    return this.db.candidates;
   }
 
   private seed() {
     console.log('🌱 Seeding HR System Database...');
 
-    this.set('users', employees);
-    this.set('candidates', candidates);
+    this.db.users = employees;
+    this.db.candidates = candidates;
   }
 }
