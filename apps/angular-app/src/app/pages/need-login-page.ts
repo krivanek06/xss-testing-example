@@ -37,7 +37,7 @@ export class NeedLoginPage {
 
   redirectToLogin() {
     const statePayload = {
-      appName: 'Workday Clone (Angular)',
+      appName: 'HR Clone (Angular)',
       traceId: `sp-${Math.floor(Math.random() * 10000)}`,
       redirectUrl: this.THIS_APP_URL,
     };

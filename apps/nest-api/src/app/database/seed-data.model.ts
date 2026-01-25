@@ -19,20 +19,25 @@ export type Candidate = {
   coverLetter: string;
   resumeUrl: string;
   comments: string[];
+  createdAt: string;
 };
 
 export type CandidateDTO = Omit<Candidate, 'id'>;
 
-export const candidates = Array.from({ length: 20 }).map((_, index) => ({
-  id: `c${index + 1}`,
-  name: faker.person.fullName(),
-  email: faker.internet.email(),
-  status: faker.helpers.arrayElement(['New', 'Interviewing', 'Rejected', 'Hired']) as Candidate['status'],
-  position: faker.person.jobTitle(),
-  coverLetter: faker.lorem.paragraphs(2),
-  resumeUrl: faker.internet.url(),
-  comments: [],
-}));
+export const candidates = Array.from({ length: 20 }).map(
+  (_, index) =>
+    ({
+      id: `c${index + 1}`,
+      name: faker.person.fullName(),
+      email: faker.internet.email(),
+      status: faker.helpers.arrayElement(['New', 'Interviewing', 'Rejected', 'Hired']) as Candidate['status'],
+      position: faker.person.jobTitle(),
+      coverLetter: faker.lorem.paragraphs(2),
+      resumeUrl: 'https://pdfobject.com/pdf/sample.pdf',
+      comments: [],
+      createdAt: faker.date.past().toISOString(),
+    }) satisfies Candidate
+);
 
 export const employees: User[] = [
   {

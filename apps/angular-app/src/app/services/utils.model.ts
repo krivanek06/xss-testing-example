@@ -1,6 +1,5 @@
 export const customDecodeToken = <T>(token: string): T | null => {
   try {
-    console.log('Decoding token:', token);
     // split the token into 3 parts
     const parts = token.split('.');
 
@@ -21,6 +20,12 @@ export const customDecodeToken = <T>(token: string): T | null => {
         .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
         .join('')
     );
+
+    console.log('Decoding Token', {
+      token,
+      decode: jsonPayload,
+      decoded: JSON.parse(jsonPayload),
+    });
 
     // parse JSON
     return JSON.parse(jsonPayload);

@@ -14,6 +14,7 @@ export type Candidate = {
   position: string;
   coverLetter: string;
   resumeUrl: string;
+  createdAt: string;
 };
 
 export type CandidateStatusFilter = Candidate['status'] | 'All';

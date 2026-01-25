@@ -6,14 +6,27 @@ import { Candidate, CandidateDTO } from '../database/seed-data.model';
 export class CandidatesService {
   constructor(private fakeDatabaseService: FakeDatabaseService) {}
 
-  getAllCandidates(body: { status: Candidate['status']; offset: number; limit: number }) {
-    console.log('Fetching all candidates', {
-      status: body.status,
-      offset: body.offset,
-      limit: body.limit,
-    });
+  getAllCandidates(body: {
+    status?: Candidate['status'];
+    offset?: number;
+    limit?: number;
+    order?: 'latest' | 'oldest';
+  }) {
+    const candidates = this.fakeDatabaseService
+      .getAllType('candidates')
+      .sort((a, b) => {
+        if (body.order === 'latest') {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        } else {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        }
+      })
+      .filter(candidate => (body.status ? candidate.status === body.status : true));
 
-    return this.fakeDatabaseService.getAllType('candidates');
+    const start = body.offset || 0;
+    const end = body.limit ? start + body.limit : undefined;
+
+    return candidates.slice(start, end);
   }
 
   createCandidate(candidate: CandidateDTO) {

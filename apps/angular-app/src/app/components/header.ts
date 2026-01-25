@@ -11,7 +11,7 @@ import { AppState } from '../services/app-state';
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex justify-between h-16">
             <div class="flex items-center">
-              <span class="text-2xl font-bold text-indigo-600">Workday Clone</span>
+              <span class="text-2xl font-bold text-indigo-600">HR Clone</span>
             </div>
             <div class="flex items-center">
               <button (click)="logout()" class="text-gray-500 hover:text-gray-700 font-medium">Logout</button>

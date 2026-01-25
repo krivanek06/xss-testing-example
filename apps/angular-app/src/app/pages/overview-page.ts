@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -10,7 +11,7 @@ import { CandidateStatusFilter } from '../services/data.model';
 
 @Component({
   selector: 'app-overview-page',
-  imports: [MatDialogModule, MatSnackBarModule],
+  imports: [MatDialogModule, MatSnackBarModule, DatePipe],
   template: `
     <div class="mt-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -129,9 +130,22 @@ import { CandidateStatusFilter } from '../services/data.model';
                       <a
                         [href]="candidate.resumeUrl"
                         target="_blank"
-                        class="text-indigo-600 hover:text-indigo-900 mr-4">
+                        class="text-indigo-600 hover:text-indigo-900 mr-4 font-medium flex items-center">
                         View Resume &rarr;
                       </a>
+
+                      <div class="flex items-center text-xs text-gray-400 border-l border-gray-300 pl-4">
+                        <svg class="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span [title]="candidate.createdAt | date: 'full'">
+                          {{ candidate.createdAt | date: 'mediumDate' }}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -185,6 +199,10 @@ export class OverviewPage {
         order: params.sort.sort,
       }),
   });
+
+  constructor() {
+    effect(() => console.log(this.candidatesResource.value()));
+  }
 
   onAddCandidate() {
     const dialogRef = this.dialog.open(CandidateFormDialogComponent, {

@@ -7,8 +7,13 @@ export class CandidatesController {
   constructor(private candidatesService: CandidatesService) {}
 
   @Get()
-  getAllCandidates(@Query() status: Candidate['status'], @Query() offset: number, @Query() limit: number) {
-    return this.candidatesService.getAllCandidates({ status, offset, limit });
+  getAllCandidates(
+    @Query('status') status: Candidate['status'],
+    @Query('offset') offset: number,
+    @Query('limit') limit: number,
+    @Query('order') order: 'latest' | 'oldest'
+  ) {
+    return this.candidatesService.getAllCandidates({ status, offset, limit, order });
   }
 
   @Post()
