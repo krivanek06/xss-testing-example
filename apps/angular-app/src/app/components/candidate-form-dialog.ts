@@ -6,7 +6,7 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { CandidateStatus } from '../services/data.model';
+import { Candidate } from '../services/data.model';
 
 @Component({
   selector: 'app-candidate-form-dialog',
@@ -95,7 +95,7 @@ export class CandidateFormDialogComponent {
     name: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     position: ['', Validators.required],
-    status: ['New' satisfies CandidateStatus, Validators.required],
+    status: ['New' satisfies Candidate['status'], Validators.required],
     resumeUrl: [''],
     coverLetter: [''], // No validators here to allow free text/html for the exploit
     comments: [[]],

@@ -1,12 +1,11 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { catchError, map, of, tap } from 'rxjs';
-import { Candidate, User } from './data.model';
+import { catchError, delay, map, of } from 'rxjs';
+import { Candidate, CandidateStatusFilter, User } from './data.model';
 
 type AppStateModel = {
   user: User | null;
   token: string | null;
-  candidates: Candidate[];
 };
 
 @Injectable({
@@ -17,7 +16,6 @@ export class AppState {
   private readonly state = signal<AppStateModel>({
     user: null,
     token: null,
-    candidates: [],
   });
 
   readonly publicState = computed(() => this.state());
@@ -27,14 +25,14 @@ export class AppState {
   private readonly candidateUrl = 'http://localhost:3000/api/candidates';
 
   getAllCandidates(params?: {
-    status?: Candidate['status'];
+    status?: CandidateStatusFilter;
     offset?: number;
     limit?: number;
     order?: 'latest' | 'oldest';
-  }): void {
+  }) {
     let httpParams = new HttpParams();
 
-    if (params?.status) {
+    if (params?.status && params.status !== 'All') {
       httpParams = httpParams.set('status', params.status);
     }
     if (params?.offset) {
@@ -48,35 +46,22 @@ export class AppState {
     }
 
     // load candidates
-    this.http.get<Candidate[]>(this.candidateUrl, { params: httpParams }).subscribe(candidates => {
-      this.state.update(s => ({ ...s, candidates }));
-    });
+    return this.http.get<Candidate[]>(this.candidateUrl, { params: httpParams }).pipe(delay(1000));
   }
 
   createCandidate(candidate: Candidate) {
     return this.http.post<Candidate>(this.candidateUrl, candidate).pipe(
-      tap(candidate => this.state.update(s => ({ ...s, candidates: [...s.candidates, candidate] }))),
       map(() => true),
       catchError(() => of(false))
     );
   }
 
-  updateCandidate(id: string, candidate: Partial<Candidate>): void {
-    this.http.put<void>(`${this.candidateUrl}/${id}`, candidate).subscribe(() => {
-      this.state.update(s => ({
-        ...s,
-        candidates: s.candidates.map(c => (c.id === id ? { ...c, ...candidate } : c)),
-      }));
-    });
+  updateCandidate(id: string, candidate: Partial<Candidate>) {
+    return this.http.put<void>(`${this.candidateUrl}/${id}`, candidate);
   }
 
   deleteCandidate(id: string) {
-    this.http.delete<void>(`${this.candidateUrl}/${id}`).subscribe(() => {
-      this.state.update(s => ({
-        ...s,
-        candidates: s.candidates.filter(c => c.id !== id),
-      }));
-    });
+    return this.http.delete<void>(`${this.candidateUrl}/${id}`);
   }
 
   setData<T extends keyof AppStateModel>(key: T, value: AppStateModel[T]) {

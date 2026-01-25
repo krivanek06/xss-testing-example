@@ -16,6 +16,6 @@ export type Candidate = {
   resumeUrl: string;
 };
 
-export type CandidateStatus = Candidate['status'];
+export type CandidateStatusFilter = Candidate['status'] | 'All';
 
 export type CandidateDTO = Omit<Candidate, 'id'>;
