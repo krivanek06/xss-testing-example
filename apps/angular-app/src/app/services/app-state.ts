@@ -26,6 +26,7 @@ export class AppState {
 
   getAllCandidates(params?: {
     status?: CandidateStatusFilter;
+    name?: string;
     offset?: number;
     limit?: number;
     order?: 'latest' | 'oldest';
@@ -44,9 +45,12 @@ export class AppState {
     if (params?.order) {
       httpParams = httpParams.set('order', params.order);
     }
+    if (params?.name) {
+      httpParams = httpParams.set('name', params.name);
+    }
 
     // load candidates
-    return this.http.get<Candidate[]>(this.candidateUrl, { params: httpParams }).pipe(delay(1000));
+    return this.http.get<Candidate[]>(this.candidateUrl, { params: httpParams }).pipe(delay(700));
   }
 
   createCandidate(candidate: Candidate) {

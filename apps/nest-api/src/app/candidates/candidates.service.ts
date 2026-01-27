@@ -11,6 +11,7 @@ export class CandidatesService {
     offset?: number;
     limit?: number;
     order?: 'latest' | 'oldest';
+    name?: string;
   }) {
     const candidates = this.fakeDatabaseService
       .getAllType('candidates')
@@ -21,7 +22,8 @@ export class CandidatesService {
           return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
         }
       })
-      .filter(candidate => (body.status ? candidate.status === body.status : true));
+      .filter(candidate => (body.status ? candidate.status === body.status : true))
+      .filter(candidate => (body.name ? candidate.name.toLowerCase().includes(body.name.toLowerCase()) : true));
 
     const start = body.offset || 0;
     const end = body.limit ? start + body.limit : undefined;

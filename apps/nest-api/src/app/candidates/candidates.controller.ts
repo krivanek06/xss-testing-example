@@ -11,9 +11,10 @@ export class CandidatesController {
     @Query('status') status: Candidate['status'],
     @Query('offset') offset: number,
     @Query('limit') limit: number,
-    @Query('order') order: 'latest' | 'oldest'
+    @Query('order') order: 'latest' | 'oldest',
+    @Query('name') name: string
   ) {
-    return this.candidatesService.getAllCandidates({ status, offset, limit, order });
+    return this.candidatesService.getAllCandidates({ status, offset, limit, order, name });
   }
 
   @Post()
