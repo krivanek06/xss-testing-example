@@ -11,6 +11,25 @@ export class AuthController {
     private readonly jwtService: JwtService
   ) {}
 
+  @Post('authenticate')
+  @HttpCode(HttpStatus.OK)
+  authenticateWithToken(@Body('token') token: string) {
+    try {
+      const decoded = this.jwtService.verify(token);
+      const users = this.db.getUsers();
+      const user = users.find(u => u.id === decoded.sub);
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      return user;
+    } catch (error) {
+      console.error('Token verification failed:', error);
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
+
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto) {

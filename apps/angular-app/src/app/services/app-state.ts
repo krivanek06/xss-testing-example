@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { catchError, delay, map, of } from 'rxjs';
-import { Candidate, CandidateStatusFilter, User } from './data.model';
+import { Candidate, CandidateStatusFilter, CommentDTO, User } from './data.model';
 
 type AppStateModel = {
   user: User | null;
@@ -23,6 +23,17 @@ export class AppState {
   readonly currentUser = computed(() => this.state().user!);
 
   private readonly candidateUrl = 'http://localhost:3000/api/candidates';
+  private readonly authUrl = 'http://localhost:3000/api/auth';
+
+  constructor() {
+    effect(() => {
+      console.log('AppState changed:', this.state());
+    });
+  }
+
+  authenticateWithToken(token: string) {
+    return this.http.post<User>(`${this.authUrl}/authenticate`, { token });
+  }
 
   getAllCandidates(params?: {
     status?: CandidateStatusFilter;
@@ -53,6 +64,10 @@ export class AppState {
     return this.http.get<Candidate[]>(this.candidateUrl, { params: httpParams }).pipe(delay(700));
   }
 
+  getCandidateById(id: string) {
+    return this.http.get<Candidate>(`${this.candidateUrl}/${id}`);
+  }
+
   createCandidate(candidate: Candidate) {
     return this.http.post<Candidate>(this.candidateUrl, candidate).pipe(
       map(() => true),
@@ -66,6 +81,10 @@ export class AppState {
 
   deleteCandidate(id: string) {
     return this.http.delete<void>(`${this.candidateUrl}/${id}`);
+  }
+
+  addComment(candidateId: string, commentPayload: CommentDTO) {
+    return this.http.post<void>(`${this.candidateUrl}/${candidateId}/comments`, commentPayload);
   }
 
   setData<T extends keyof AppStateModel>(key: T, value: AppStateModel[T]) {

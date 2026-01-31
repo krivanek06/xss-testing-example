@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { debounceTime, filter, map } from 'rxjs';
 import { CandidateFormDialogComponent } from '../components/candidate-form-dialog';
 import { AppState } from '../services/app-state';
@@ -11,7 +11,7 @@ import { CandidateStatusFilter } from '../services/data.model';
 
 @Component({
   selector: 'app-overview-page',
-  imports: [MatDialogModule, MatSnackBarModule, DatePipe],
+  imports: [MatDialogModule, MatSnackBarModule, DatePipe, RouterLink],
   template: `
     <div class="mt-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -134,10 +134,9 @@ import { CandidateStatusFilter } from '../services/data.model';
                     </div>
                     <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                       <a
-                        [href]="candidate.resumeUrl"
-                        target="_blank"
+                        [routerLink]="['/overview', 'candidate', candidate.id]"
                         class="text-indigo-600 hover:text-indigo-900 mr-4 font-medium flex items-center">
-                        View Resume &rarr;
+                        View Candidate &rarr;
                       </a>
                       <div class="flex items-center text-xs text-gray-400 border-l border-gray-300 pl-4">
                         <span [title]="candidate.createdAt | date: 'full'">{{

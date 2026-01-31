@@ -1,5 +1,5 @@
 import { afterNextRender, Component, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './components/header';
 import { AppState } from './services/app-state';
 import { User } from './services/data.model';
@@ -18,6 +18,7 @@ import { customDecodeToken } from './services/utils.model';
 })
 export class App {
   private readonly appState = inject(AppState);
+  private readonly router = inject(Router);
 
   constructor() {
     const storedToken = localStorage.getItem('access_token');
@@ -27,8 +28,7 @@ export class App {
 
       // decoded token is valid, restore session
       if (decodedToken) {
-        this.appState.setData('token', storedToken);
-        this.appState.setData('user', decodedToken);
+        this.authenticateWithToken(storedToken);
       }
     }
 
@@ -50,11 +50,25 @@ export class App {
         url.searchParams.delete('token');
         window.history.replaceState({}, document.title, url.toString());
 
-        // store in app state and local storage
-        this.appState.setData('token', token);
-        this.appState.setData('user', decodedToken);
-        localStorage.setItem('access_token', token);
+        this.authenticateWithToken(token);
       }
+    });
+  }
+
+  private authenticateWithToken(token: string) {
+    this.appState.authenticateWithToken(token).subscribe({
+      next: user => {
+        this.appState.setData('token', token);
+        this.appState.setData('user', user);
+        localStorage.setItem('access_token', token);
+        this.router.navigateByUrl('/overview');
+      },
+      error: err => {
+        console.error('Token authentication failed', err);
+        this.appState.setData('token', null);
+        this.appState.setData('user', null);
+        localStorage.removeItem('access_token');
+      },
     });
   }
 }

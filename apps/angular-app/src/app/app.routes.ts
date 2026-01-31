@@ -33,6 +33,14 @@ export const appRoutes: Route[] = [
         path: '',
         loadComponent: () => import('./pages/overview-page').then(m => m.OverviewPage),
       },
+      {
+        path: 'candidate/:id',
+        loadComponent: () => import('./pages/candidate-detail-page').then(m => m.CandidateDetailPage),
+      },
     ],
+  },
+  {
+    path: '**',
+    redirectTo: '/overview',
   },
 ];

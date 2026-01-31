@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FakeDatabaseService } from '../database/fake-database.service';
-import { Candidate, CandidateDTO } from '../database/seed-data.model';
+import { Candidate, CandidateComment, CandidateDTO, CommentDTO } from '../database/seed-data.model';
 
 @Injectable()
 export class CandidatesService {
@@ -31,6 +31,10 @@ export class CandidatesService {
     return candidates.slice(start, end);
   }
 
+  getCandidateById(id: string) {
+    return this.fakeDatabaseService.getCandidates().find(candidate => candidate.id === id);
+  }
+
   createCandidate(candidate: CandidateDTO) {
     const randomId = Math.random().toString(36).substring(2, 15);
 
@@ -44,13 +48,28 @@ export class CandidatesService {
     return candidate;
   }
 
+  addComment(candidateId: string, comment: CommentDTO) {
+    const candidate = this.getCandidateById(candidateId);
+
+    if (!candidate) {
+      throw new Error('Candidate not found');
+    }
+
+    const commentData = {
+      ...comment,
+      id: Math.random().toString(36).substring(2, 15),
+    } satisfies CandidateComment;
+
+    this.fakeDatabaseService.update('candidates', candidateId, { comments: [...candidate.comments, commentData] });
+
+    return commentData;
+  }
+
   updateCandidate(id: string, candidate: Partial<CandidateDTO>) {
     this.fakeDatabaseService.update('candidates', id, candidate);
-    console.log('Updating candidate:', candidate);
   }
 
   deleteCandidate(id: string) {
     this.fakeDatabaseService.deleteItem('candidates', id);
-    console.log('Deleting candidate with id:', id);
   }
 }

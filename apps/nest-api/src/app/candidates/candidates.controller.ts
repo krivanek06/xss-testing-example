@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
-import type { Candidate, CandidateDTO } from '../database/seed-data.model';
+import type { Candidate, CandidateDTO, CommentDTO } from '../database/seed-data.model';
 import { CandidatesService } from './candidates.service';
 
 @Controller('candidates')
@@ -17,6 +17,11 @@ export class CandidatesController {
     return this.candidatesService.getAllCandidates({ status, offset, limit, order, name });
   }
 
+  @Get(':id')
+  getCandidateById(@Param('id') id: string) {
+    return this.candidatesService.getCandidateById(id);
+  }
+
   @Post()
   createCandidate(@Body() candidate: CandidateDTO) {
     this.candidatesService.createCandidate(candidate);
@@ -30,5 +35,10 @@ export class CandidatesController {
   @Delete(':id')
   deleteCandidate(@Param('id') id: string) {
     this.candidatesService.deleteCandidate(id);
+  }
+
+  @Post(':id/comments')
+  addComment(@Param('id') candidateId: string, @Body() comment: CommentDTO) {
+    this.candidatesService.addComment(candidateId, comment);
   }
 }

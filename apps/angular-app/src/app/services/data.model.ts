@@ -15,8 +15,18 @@ export type Candidate = {
   coverLetter: string;
   resumeUrl: string;
   createdAt: string;
+  comments: Comment[];
+};
+
+export type Comment = {
+  id: string;
+  comment: string;
+  timestamp: string;
+  username: string;
+  userId: string;
 };
 
 export type CandidateStatusFilter = Candidate['status'] | 'All';
 
 export type CandidateDTO = Omit<Candidate, 'id'>;
+export type CommentDTO = Omit<Comment, 'id'>;
