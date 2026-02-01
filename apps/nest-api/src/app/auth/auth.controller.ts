@@ -1,8 +1,18 @@
 // auth/auth.controller.ts
-import { Body, Controller, HttpCode, HttpStatus, Post, UnauthorizedException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { FakeDatabaseService } from '../database/fake-database.service'; // Adjust path as needed
-import { LoginDto } from './auth.model';
+import { LoginDto, UpdateUserDto } from './auth.model';
 
 @Controller('auth')
 export class AuthController {
@@ -67,5 +77,23 @@ export class AuthController {
         avatar: user.avatar,
       },
     };
+  }
+
+  @Put('user/:id')
+  updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    // check if user exists
+    const users = this.db.getUsers();
+    const existingUser = users.find(u => u.id === id);
+
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    // update user in the fake DB
+    this.db.update('users', id, updateUserDto);
+
+    // return the updated user
+    const updatedUser = this.db.getUsers().find(u => u.id === id);
+    return updatedUser;
   }
 }
