@@ -65,11 +65,37 @@ export class CandidatesService {
     return commentData;
   }
 
+  deleteComment(candidateId: string, commentId: string) {
+    const candidate = this.getCandidateById(candidateId);
+
+    if (!candidate) {
+      throw new Error('Candidate not found');
+    }
+
+    const updatedComments = candidate.comments.filter(comment => comment.id !== commentId);
+
+    this.fakeDatabaseService.update('candidates', candidateId, { comments: updatedComments });
+  }
+
   updateCandidate(id: string, candidate: Partial<CandidateDTO>) {
     this.fakeDatabaseService.update('candidates', id, candidate);
   }
 
   deleteCandidate(id: string) {
     this.fakeDatabaseService.deleteItem('candidates', id);
+  }
+
+  deleteComment(candidateId: string, commentId: string) {
+    const candidate = this.getCandidateById(candidateId);
+
+    if (!candidate) {
+      throw new Error('Candidate not found');
+    }
+
+    const updatedComments = candidate.comments.filter(comment => comment.id !== commentId);
+
+    this.fakeDatabaseService.update('candidates', candidateId, { comments: updatedComments });
+
+    return;
   }
 }

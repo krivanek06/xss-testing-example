@@ -87,6 +87,10 @@ export class AppState {
     return this.http.post<void>(`${this.candidateUrl}/${candidateId}/comments`, commentPayload);
   }
 
+  deleteComment(candidateId: string, commentId: string) {
+    return this.http.delete<void>(`${this.candidateUrl}/${candidateId}/comments/${commentId}`);
+  }
+
   setData<T extends keyof AppStateModel>(key: T, value: AppStateModel[T]) {
     this.state.set({
       ...this.state(),

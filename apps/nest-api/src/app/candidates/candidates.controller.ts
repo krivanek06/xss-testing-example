@@ -41,4 +41,9 @@ export class CandidatesController {
   addComment(@Param('id') candidateId: string, @Body() comment: CommentDTO) {
     this.candidatesService.addComment(candidateId, comment);
   }
+
+  @Delete(':id/comments/:commentId')
+  deleteComment(@Param('id') candidateId: string, @Param('commentId') commentId: string) {
+    this.candidatesService.deleteComment(candidateId, commentId);
+  }
 }
