@@ -129,20 +129,28 @@ import { CandidateStatusFilter } from '../services/data.model';
                     </div>
                   </div>
                   <div class="mt-2 sm:flex sm:justify-between">
-                    <div class="sm:flex">
+                    <div class="sm:flex items-center gap-4">
                       <p class="flex items-center text-sm text-gray-500">{{ candidate.position }}</p>
+                      <span class="text-gray-400">|</span>
+                      <span class="text-xs text-gray-400" [title]="candidate.createdAt | date: 'full'">{{
+                        candidate.createdAt | date: 'mediumDate'
+                      }}</span>
                     </div>
-                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 gap-4">
+                      <!-- resume link -->
+                      <a
+                        [href]="candidate.resumeUrl"
+                        target="_blank"
+                        class="text-indigo-600 hover:text-indigo-900 mr-4 font-medium flex items-center">
+                        View Resume &rarr;
+                      </a>
+
+                      <!-- candidate detail link -->
                       <a
                         [routerLink]="['/overview', 'candidate', candidate.id]"
                         class="text-indigo-600 hover:text-indigo-900 mr-4 font-medium flex items-center">
                         View Candidate &rarr;
                       </a>
-                      <div class="flex items-center text-xs text-gray-400 border-l border-gray-300 pl-4">
-                        <span [title]="candidate.createdAt | date: 'full'">{{
-                          candidate.createdAt | date: 'mediumDate'
-                        }}</span>
-                      </div>
                     </div>
                   </div>
                   <div class="mt-3 text-sm text-gray-500 border-t border-gray-400 pt-3">
