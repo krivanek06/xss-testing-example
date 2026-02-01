@@ -5,8 +5,10 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { SafeHtmlPipe } from '../pipes/safe-html.pipe';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { catchError, map, of } from 'rxjs';
 import { AppState } from '../services/app-state';
+import { AvatarComponent } from './avatar';
 
 @Component({
   selector: 'app-edit-profile-dialog',
@@ -17,7 +19,7 @@ import { AppState } from '../services/app-state';
     MatButtonModule,
     MatIconModule,
     FormsModule,
-    SafeHtmlPipe,
+    AvatarComponent,
   ],
   template: `
     <h2 mat-dialog-title>Edit Profile</h2>
@@ -60,16 +62,7 @@ import { AppState } from '../services/app-state';
           <div class="mt-2 text-center">
             <p class="text-sm font-medium text-gray-700 mb-2">Preview:</p>
 
-            @if (isSvg()) {
-              <div
-                class="w-24 h-24 mx-auto border rounded-full overflow-hidden [&>svg]:w-full [&>svg]:h-full"
-                [innerHTML]="avatarPreview() | safeHtml"></div>
-            } @else {
-              <img
-                [src]="avatarPreview()"
-                alt="Image Preview"
-                class="w-24 h-24 mx-auto rounded-full object-cover border" />
-            }
+            <app-avatar [src]="avatarPreview()" cssClasses="w-24 h-24 mx-auto rounded-full border border-gray-300" />
           </div>
         }
       </form>
@@ -84,6 +77,7 @@ import { AppState } from '../services/app-state';
 export class EditProfileDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<EditProfileDialogComponent>);
   private readonly appState = inject(AppState);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly fullName = this.appState.currentUser()?.fullName || '';
 
@@ -152,10 +146,28 @@ export class EditProfileDialogComponent {
   }
 
   save() {
-    this.dialogRef.close({
-      fullName: this.fullName,
-      avatar: this.avatarPreview() || this.appState.currentUser()?.avatar,
-    });
+    this.appState
+      .updateUser({
+        fullName: this.fullName,
+        avatar: this.avatarPreview() || this.appState.currentUser()?.avatar || '',
+      })
+      .pipe(
+        map(() => 'ok' as const),
+        catchError(() => of('error' as const))
+      )
+      .subscribe(result => {
+        if (result === 'ok') {
+          this.dialogRef.close();
+
+          this.snackBar.open('Profile updated successfully!', 'Close', {
+            duration: 3000,
+          });
+        } else {
+          this.snackBar.open('Failed to update profile. Please try again.', 'Close', {
+            duration: 3000,
+          });
+        }
+      });
   }
 
   close() {

@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
-import { catchError, delay, map, of } from 'rxjs';
+import { catchError, delay, map, of, tap, throwError } from 'rxjs';
 import { Candidate, CandidateStatusFilter, CommentDTO, User } from './data.model';
 
 type AppStateModel = {
@@ -89,6 +89,17 @@ export class AppState {
 
   deleteComment(candidateId: string, commentId: string) {
     return this.http.delete<void>(`${this.candidateUrl}/${candidateId}/comments/${commentId}`);
+  }
+
+  updateUser(data: { fullName: string; avatar: string }) {
+    const currentUser = this.currentUser();
+    if (!currentUser) {
+      return throwError(() => new Error('No current user'));
+    }
+
+    return this.http
+      .put<User>(`${this.authUrl}/user/${currentUser.id}`, data)
+      .pipe(tap(updatedUser => this.setData('user', updatedUser)));
   }
 
   setData<T extends keyof AppStateModel>(key: T, value: AppStateModel[T]) {

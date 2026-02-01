@@ -60,13 +60,16 @@ export class App {
       next: user => {
         this.appState.setData('token', token);
         this.appState.setData('user', user);
+
         localStorage.setItem('access_token', token);
+
         this.router.navigateByUrl('/overview');
       },
       error: err => {
         console.error('Token authentication failed', err);
         this.appState.setData('token', null);
         this.appState.setData('user', null);
+
         localStorage.removeItem('access_token');
       },
     });
