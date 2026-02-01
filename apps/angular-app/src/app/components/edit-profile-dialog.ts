@@ -10,7 +10,6 @@ import { AppState } from '../services/app-state';
 
 @Component({
   selector: 'app-edit-profile-dialog',
-  standalone: true,
   imports: [
     MatDialogModule,
     MatFormFieldModule,
@@ -30,13 +29,19 @@ import { AppState } from '../services/app-state';
           <input matInput [(ngModel)]="fullName" name="fullName" />
         </mat-form-field>
 
+        <input type="file" #fileInput hidden accept=".png,.jpg,.jpeg,.svg" (change)="onFileSelected($event)" />
+
         <div
-          class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
+          class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          (click)="fileInput.click()"
           (dragover)="onDragOver($event)"
           (dragleave)="onDragLeave($event)"
-          (drop)="onDrop($event)">
+          (drop)="onDrop($event)"
+          tabindex="0"
+          role="button"
+          aria-label="Upload avatar">
           <mat-icon class="text-gray-400 text-4xl w-10 h-10 mb-2">cloud_upload</mat-icon>
-          <p class="text-sm text-gray-500">Drag & drop a new avatar here</p>
+          <p class="text-sm text-gray-500">Click or drag & drop to upload</p>
           <p class="text-xs text-gray-400 mt-1">Supports PNG, JPG, SVG</p>
 
           @if (fileName()) {
@@ -44,6 +49,10 @@ import { AppState } from '../services/app-state';
               <strong>Uploaded:</strong>
               <span [innerHTML]="fileName()"></span>
             </div>
+          }
+
+          @if (error()) {
+            <p class="mt-2 text-xs text-red-500 font-medium">{{ error() }}</p>
           }
         </div>
 
@@ -78,12 +87,12 @@ export class EditProfileDialogComponent {
 
   readonly fullName = this.appState.currentUser()?.fullName || '';
 
-  // Upload State
+  // State
   readonly fileName = signal<string>('');
   readonly avatarPreview = signal<string>('');
   readonly isSvg = signal<boolean>(false);
+  readonly error = signal<string>('');
 
-  // Drag & Drop Handlers
   onDragOver(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
@@ -97,30 +106,44 @@ export class EditProfileDialogComponent {
   onDrop(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
-
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
       this.handleFile(files[0]);
     }
   }
 
-  handleFile(file: File) {
-    // 1. Set Filename (Vulnerable to XSS if filename contains HTML)
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.handleFile(input.files[0]);
+    }
+  }
+
+  private handleFile(file: File) {
+    this.error.set('');
+
+    // Basic Validation: Allow only images
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      this.error.set(`Invalid file type: ${file.type || 'unknown'}. Please upload an image.`);
+      return;
+    }
+
+    // 🚨 VULNERABILITY: Filename XSS
     this.fileName.set(file.name);
 
-    // 2. Read File Content
     const reader = new FileReader();
 
     if (file.type === 'image/svg+xml') {
       this.isSvg.set(true);
-      // For SVG, we read as TEXT to inline it (Vulnerable behavior)
+      // 🚨 VULNERABILITY: Read as Text for SVG Injection
       reader.onload = (e: any) => {
         this.avatarPreview.set(e.target.result);
       };
       reader.readAsText(file);
     } else {
       this.isSvg.set(false);
-      // For images, we read as DataURL
+      // Read as Data URL for standard images
       reader.onload = (e: any) => {
         this.avatarPreview.set(e.target.result);
       };
