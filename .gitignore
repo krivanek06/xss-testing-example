@@ -46,3 +46,4 @@ Thumbs.db
 __screenshots__/
 
 vite.config.*.timestamp*
+.nx/polygraph

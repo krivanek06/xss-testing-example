@@ -248,6 +248,10 @@ export class CandidateDetailPage {
   submitComment() {
     const user = this.appState.currentUser();
     const candidate = this.candidate.value();
+
+    // TODO - make comments more JSON - allow upload gifs, svg, image, format text
+    // TODO - send JSON to server, do not validate it, display in HTML with innerHTML + safeHtml pipe
+    // TODO - steal the endpoint and make a POST request in postman and insert XSS payload directly
     const comment = this.newComment()?.trim();
 
     // not logged in
